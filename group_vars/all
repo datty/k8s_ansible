@@ -1,0 +1,4 @@
+ansible_user: root
+#ansible_become: true
+#ansible_become_user: root
+k8s_version: 1.26.3
