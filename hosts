@@ -1,0 +1,4 @@
+[kubemaster]
+kube-master[1:3].datserv.co.uk
+[kubenode]
+kube-node[1:3].datserv.co.uk

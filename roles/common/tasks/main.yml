@@ -1,0 +1,14 @@
+- name: Install epel
+  ansible.builtin.yum:
+    name: epel-release
+    state: latest
+
+- name: Install nano
+  ansible.builtin.yum:
+    name: nano
+    state: latest
+
+- name: Install htop
+  ansible.builtin.yum:
+    name: htop
+    state: latest

@@ -1,0 +1,34 @@
+#Install containerd for k8s with systemd cgroup
+- name: Add docker repo
+  ansible.builtin.yum_repository:
+    name: docker-ce-stable
+    description: Docker CE Stable - $basearch
+    file: docker
+    baseurl: https://download.docker.com/linux/centos/$releasever/$basearch/stable
+    gpgkey: https://download.docker.com/linux/centos/gpg
+    enabled: yes
+
+- name: Install containerd
+  ansible.builtin.yum:
+    name: "containerd.io"
+    state: present
+
+- name: Install CNI
+  ansible.builtin.yum:
+    name: "containernetworking-plugins"
+    state: present
+
+- name: Configure containerd
+  ansible.builtin.template:
+    src: containerd_config.toml.j2
+    dest: /etc/containerd/config.toml
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart containerd
+
+- name: Start containerd
+  ansible.builtin.systemd:
+    name: containerd
+    state: started
+    enabled: true

@@ -1,0 +1,30 @@
+#Install k8s repo and kubeadm/kubelet/kubectl 
+- name: Add k8s repo
+  ansible.builtin.yum_repository:
+    name: kubernetes
+    description: kubernetes repo
+    file: kubernetes
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-$basearch
+    gpgkey: https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    enabled: yes
+    exclude: kubelet, kubeadm, kubectl
+
+- name: Put SELinux in permissive mode, logging actions that would be blocked.
+  ansible.posix.selinux:
+    policy: targeted
+    state: permissive
+  
+- name: Install k8s packages
+  ansible.builtin.yum:
+    name:
+      - kubeadm-{{ k8s_version }}
+      - kubectl-{{ k8s_version }}
+      - kubelet-{{ k8s_version }}
+    state: latest
+    disable_excludes: kubernetes
+
+- name: Start kubelet
+  ansible.builtin.systemd:
+    name: kubelet
+    state: started
+    enabled: true
