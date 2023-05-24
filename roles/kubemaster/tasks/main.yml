@@ -1,3 +1,43 @@
-- name: Install the correct web server for RHEL
-  import_tasks: redhat.yml
-  when: ansible_facts['os_family']|lower == 'redhat'
+- name: Kubeadm init first node
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/kubeadm
+      - init
+      - --apiserver-advertise-address
+      - "{{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}}"
+      - --control-plane-endpoint
+      - "{{ k8s_control_plane_hostname }}:{{ k8s_control_plane_port }}"
+      - --pod-network-cidr
+      - "{{ k8s_pod_network_cidr }}"
+      - --upload-certs
+      - --certificate-key
+      - "{{ k8s_certificate_key }}"
+    creates: /etc/kubernetes/admin.conf
+  when: "'kube-master1' in inventory_hostname"
+
+- name: Wait for kube API to respond
+  ansible.builtin.wait_for:
+    port: 6443
+    delay: 10
+  when: "'kube-master1' in inventory_hostname"
+
+- name: Kubeadm get join command
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/kubeadm
+      - token
+      - create
+      - --print-join-command
+  register: kubeadm_join
+  when: "'kube-master1' in inventory_hostname"
+
+- name: Create facts for join command
+  ansible.builtin.set_fact:
+    kubeadm_join_cmd: "{{ kubeadm_join.stdout_lines[0] }}"
+  when: "'kube-master1' in inventory_hostname"
+
+- name: Kubeadm join control nodes
+  ansible.builtin.command:
+    cmd: "{{ hostvars['kube-master1.datserv.co.uk']['kubeadm_join_cmd'] }} --control-plane --apiserver-advertise-address {{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}} --certificate-key {{ k8s_certificate_key }}"
+    creates: /etc/kubernetes/admin.conf
+  when: "'kube-master1' not in inventory_hostname"

@@ -2,3 +2,7 @@
   roles:
   - common
   - kubebase
+- hosts: kubemaster
+  roles:
+  - kubemaster
+

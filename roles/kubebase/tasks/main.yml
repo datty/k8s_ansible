@@ -30,8 +30,20 @@
     sysctl_file: /etc/sysctl.d/k8s.conf
     sysctl_set: true
 
+- name: Disable swap for current session
+  ansible.builtin.command: swapoff -a
+  become: true
+
+- name: Disable swap permanently, persist reboots
+  replace:
+    path: /etc/fstab
+    regexp: '^(\s*)([^#\n]+\s+)(\w+\s+)swap(\s+.*)$'
+    replace: '#\1\2\3swap\4'
+    backup: yes
+
 - name: Install containerd for k8s
   import_tasks: roles/kubebase/tasks/containerd.yml
 
 - name: Install kubetools
   import_tasks: ./kubetools.yml
+

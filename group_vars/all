@@ -1,4 +1,8 @@
-ansible_user: root
-#ansible_become: true
-#ansible_become_user: root
-k8s_version: 1.26.3
+ansible_user: datty
+ansible_become: true
+ansible_become_user: root
+k8s_version: 1.27.2
+k8s_control_plane_hostname: kubemaster.datserv.co.uk
+k8s_control_plane_port: 6443
+k8s_pod_network_cidr: 192.168.64.0/22
+k8s_certificate_key: aefa4b7dc74f5d557917cb08164eda1a0078a5d8a7bdc1dab770032a496c0077
