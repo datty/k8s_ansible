@@ -31,9 +31,16 @@
   register: kubeadm_join
   when: "'kube-master1' in inventory_hostname"
 
-- name: Create facts for join command
+- name: Kubeadm get ca cert hash
+  ansible.builtin.shell:
+    cmd: "/usr/bin/openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | /usr/bin/openssl rsa -pubin -outform der 2>/dev/null | /usr/bin/openssl dgst -sha256 -hex | /usr/bin/sed 's/^.* //'"
+  register: kubeadm_ca_cert_hash
+  when: "'kube-master1' in inventory_hostname"
+
+- name: Create facts for joining nodes
   ansible.builtin.set_fact:
     kubeadm_join_cmd: "{{ kubeadm_join.stdout_lines[0] }}"
+    kubeadm_ca_cert_hash: "{{ kubeadm_ca_cert_hash.stdout_lines[0] }}"
   when: "'kube-master1' in inventory_hostname"
 
 - name: Kubeadm join control nodes

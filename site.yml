@@ -5,4 +5,6 @@
 - hosts: kubemaster
   roles:
   - kubemaster
-
+- hosts: kubenode
+  roles:
+  - kubenode
