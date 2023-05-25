@@ -1,0 +1,51 @@
+- name: Get deployments to check if Calico Tigera is applied
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/kubectl
+      - --kubeconfig
+      - /etc/kubernetes/admin.conf
+      - get
+      - deployment
+      - -A
+  register: calico_get_deployments
+
+- name: Install Calico Tigera Operator
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/kubectl
+      - --kubeconfig
+      - /etc/kubernetes/admin.conf
+      - create
+      - -f
+      - "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml"
+  when: not 'tigera-operator' in calico_get_deployments.stdout
+
+- name: Write Calico manifest
+  ansible.builtin.template:
+    src: calico.yaml.j2
+    dest: /etc/kubernetes/calico.yaml
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Get installations.operator.tigera.io to check if Calico manifest is applied
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/kubectl
+      - --kubeconfig
+      - /etc/kubernetes/admin.conf
+      - get
+      - installations.operator.tigera.io
+      - -A
+  register: calico_get_installations
+
+- name: Install Calico Manifest
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/kubectl
+      - --kubeconfig
+      - /etc/kubernetes/admin.conf
+      - create
+      - -f
+      - /etc/kubernetes/calico.yaml
+  when: not 'default' in calico_get_installations.stdout

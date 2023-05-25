@@ -18,7 +18,7 @@
 - name: Wait for kube API to respond
   ansible.builtin.wait_for:
     port: 6443
-    delay: 10
+    delay: 2
   when: "'kube-master1' in inventory_hostname"
 
 - name: Kubeadm get join command
@@ -48,3 +48,7 @@
     cmd: "{{ hostvars['kube-master1.datserv.co.uk']['kubeadm_join_cmd'] }} --control-plane --apiserver-advertise-address {{hostvars[inventory_hostname]['ansible_default_ipv4']['address']}} --certificate-key {{ k8s_certificate_key }}"
     creates: /etc/kubernetes/admin.conf
   when: "'kube-master1' not in inventory_hostname"
+
+- name: Install Calico
+  import_tasks: ./calico.yml
+  when: "'kube-master1' in inventory_hostname"

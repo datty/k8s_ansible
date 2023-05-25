@@ -1,4 +1,4 @@
 - name: Kubeadm join worker nodes
   ansible.builtin.command:
     cmd: "{{ hostvars['kube-master1.datserv.co.uk']['kubeadm_join_cmd'] }} --discovery-token-ca-cert-hash sha256:{{ hostvars['kube-master1.datserv.co.uk']['kubeadm_ca_cert_hash'] }}"
-    creates: /etc/kubernetes/admin.conf
+    creates: /etc/kubernetes/kubelet.conf
